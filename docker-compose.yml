@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - pan-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8081
+      - GIN_MODE=release
+    volumes:
+      - uploads:/app/uploads
+    networks:
+      - pan-network
+    restart: unless-stopped
+
+networks:
+  pan-network:
+    driver: bridge
+
+volumes:
+  uploads:
+    driver: local
