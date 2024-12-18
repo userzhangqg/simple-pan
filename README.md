@@ -143,20 +143,20 @@ go run main.go
 
 ## 目录结构
 
-\`\`\`
+```
 .
-├── frontend/               # 前端项目
-│   ├── src/               # 源代码
-│   ├── public/            # 静态资源
-│   └── package.json       # 项目配置
-├── backend/               # 后端项目
-│   ├── handlers/          # 请求处理器
-│   ├── utils/             # 工具函数
-│   └── main.go           # 入口文件
-├── docker-compose.yml    # Docker Compose 配置
-├── Dockerfile.frontend   # 前端 Dockerfile
-└── Dockerfile.backend    # 后端 Dockerfile
-\`\`\`
+├── frontend/             # 前端项目
+│   ├── src/             # 源代码
+│   ├── public/          # 静态资源
+│   └── package.json     # 项目配置
+├── backend/             # 后端项目
+│   ├── handlers/        # 请求处理器
+│   ├── utils/           # 工具函数
+│   └── main.go         # 入口文件
+├── docker-compose.yml   # Docker Compose 配置
+├── Dockerfile.frontend  # 前端 Dockerfile
+└── Dockerfile.backend   # 后端 Dockerfile
+```
 
 ## 贡献指南
 
