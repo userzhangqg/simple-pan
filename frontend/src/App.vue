@@ -25,7 +25,7 @@
             :on-error="handleUploadError"
             :before-upload="beforeUpload"
             :on-progress="handleUploadStart"
-            accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+            accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt,.epub"
             multiple
             :disabled="uploadLoading">
             <el-icon class="el-icon--upload"><upload-filled /></el-icon>
@@ -97,14 +97,14 @@
         <el-tooltip
           :content="$t('message.preview')"
           placement="top"
-          :disabled="!isMobileDevice || (!isImage(scope.row.name) && !isPdf(scope.row.name))">
+          :disabled="!isMobileDevice || (!isImage(scope.row.name) && !isPdf(scope.row.name) && !isEpub(scope.row.name))">
           <el-button
             size="small"
             type="primary"
             @click.stop="handlePreview(scope.row)"
             :icon="ZoomIn"
-            :disabled="!isImage(scope.row.name) && !isPdf(scope.row.name)"
-            :title="!isImage(scope.row.name) && !isPdf(scope.row.name) ? $t('message.file.preview.notSupported') : ''">
+            :disabled="!isImage(scope.row.name) && !isPdf(scope.row.name) && !isEpub(scope.row.name)"
+            :title="!isImage(scope.row.name) && !isPdf(scope.row.name) && !isEpub(scope.row.name) ? $t('message.file.preview.notSupported') : ''">
             <span class="button-text">{{ $t('message.preview') }}</span>
           </el-button>
         </el-tooltip>
@@ -143,47 +143,12 @@
           </div>
         </div>
 
-        <!-- 预览对话框 -->
-        <el-dialog 
-          v-model="previewVisible" 
-          :title="$t('message.preview')" 
-          width="90%"
-          class="preview-dialog"
-          :close-on-click-modal="true"
-          :show-close="true">
-          <template v-if="!isPdfPreview">
-            <div class="preview-controls">
-              <el-button-group>
-                <el-button :icon="ZoomOut" @click="handleZoomOut" />
-                <el-button>{{ Math.round(zoomLevel * 100) }}%</el-button>
-                <el-button :icon="ZoomIn" @click="handleZoomIn" />
-                <el-button :icon="RefreshRight" @click="resetZoom" />
-              </el-button-group>
-            </div>
-            <div class="preview-container" ref="previewContainer">
-              <el-image
-                ref="previewImage"
-                class="preview-image"
-                :src="previewUrl"
-                :preview-src-list="[previewUrl]"
-                fit="contain"
-                :initial-index="0"
-                :style="{ transform: `scale(${zoomLevel})` }"
-                @load="handleImageLoad"
-              />
-            </div>
-          </template>
-          <template v-else>
-            <div class="pdf-preview-container">
-              <vue-pdf-embed
-                :source="previewUrl"
-                :width="800"
-                :height="1000"
-                style="width: 100%; height: 100%;"
-              />
-            </div>
-          </template>
-        </el-dialog>
+        <!-- 文件预览组件 -->
+        <FilePreview
+          v-model="previewVisible"
+          :file="currentFile"
+          :api-base-url="API_BASE_URL"
+        />
       </el-main>
     </el-container>
   </div>
@@ -191,22 +156,20 @@
 
 <script setup>
 import { ref, onMounted, computed, shallowRef, nextTick } from 'vue'
-import VuePdfEmbed from 'vue-pdf-embed'
+import FilePreview from './components/FilePreview.vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   UploadFilled, 
   Download, 
   Delete, 
-  ZoomIn,
-  ZoomOut,
-  RefreshRight,
   Document,
   Picture,
   VideoCamera,
   Files,
   Management,
-  Search
+  Search,
+  ZoomIn
 } from '@element-plus/icons-vue'
 import axios from 'axios'
 
@@ -377,7 +340,8 @@ const SUPPORTED_FILE_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.ms-excel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'text/plain'
+  'text/plain',
+  'application/epub+zip'
 ]
 
 const beforeUpload = (file) => {
@@ -442,41 +406,19 @@ const isPdf = (filename) => {
   return ext === 'pdf'
 }
 
+const isEpub = (filename) => {
+  const ext = filename.toLowerCase().split('.').pop()
+  return ext === 'epub'
+}
+
 // 预览相关
 const previewVisible = ref(false)
-const previewUrl = ref('')
-const zoomLevel = ref(1)
-const isPdfPreview = ref(false)
-
-const MIN_ZOOM = 0.1
-const MAX_ZOOM = 3
-const ZOOM_STEP = 0.1
-
-const handleZoomIn = () => {
-  if (zoomLevel.value < MAX_ZOOM) {
-    zoomLevel.value = Math.min(zoomLevel.value + ZOOM_STEP, MAX_ZOOM)
-  }
-}
-
-const handleZoomOut = () => {
-  if (zoomLevel.value > MIN_ZOOM) {
-    zoomLevel.value = Math.max(zoomLevel.value - ZOOM_STEP, MIN_ZOOM)
-  }
-}
-
-const resetZoom = () => {
-  zoomLevel.value = 1
-}
-
+const currentFile = ref(null)
 
 const handlePreview = async (file) => {
   try {
-    previewUrl.value = `${API_BASE_URL}/files/preview/${file.name}`
+    currentFile.value = file
     previewVisible.value = true
-    isPdfPreview.value = isPdf(file.name)
-    if (!isPdfPreview.value) {
-      resetZoom()
-    }
   } catch (error) {
     console.error('Error previewing file:', error)
     ElMessage.error(t('message.file.preview.error'))
@@ -1018,14 +960,23 @@ onMounted(() => {
   transform-origin: center center;
 }
 
-.pdf-preview-container {
+.pdf-preview-container,
+.epub-preview-container {
   flex: 1;
-  overflow: auto;
-  padding: 20px;
+  overflow: hidden;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  background: #f8f9fa;
+  align-items: stretch;
+  background: #fff;
+  height: calc(90vh - 120px);
+}
+
+.epub-preview-container :deep(.epub-viewer) {
+  flex: 1;
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
 }
 
 /* 添加按钮动画效果 */

@@ -28,6 +28,7 @@ var AllowedFileTypes = map[string]bool{
 	".mp4":  true,
 	".zip":  true,
 	".rar":  true,
+	".epub": true,
 }
 
 // ValidateFile checks if the file is valid (size and type)
@@ -54,7 +55,7 @@ func GetFileType(filename string) string {
 		return "image"
 	case ".mp4", ".avi", ".mov":
 		return "video"
-	case ".doc", ".docx", ".pdf", ".txt":
+	case ".doc", ".docx", ".pdf", ".txt", ".epub":
 		return "document"
 	case ".zip", ".rar":
 		return "archive"

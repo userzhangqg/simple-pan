@@ -25,7 +25,7 @@ export default {
         dragText: '拖拽文件到此处或点击上传',
         sizeError: '文件大小不能超过100MB',
         typeError: '不支持的文件类型，仅支持以下格式：',
-        supportedTypes: '支持的文件类型：.jpg, .jpeg, .png, .gif, .pdf, .doc, .docx, .xls, .xlsx, .txt'
+        supportedTypes: '支持的文件类型：.jpg, .jpeg, .png, .gif, .pdf, .doc, .docx, .xls, .xlsx, .txt, .epub'
       },
       download: {
         success: '文件下载成功',
@@ -42,8 +42,11 @@ export default {
       preview: {
         notSupported: '该文件类型不支持预览',
         outline: '目录',
-        error: 'PDF加载失败',
-        loading: '正在加载PDF文件...'
+        error: '文件加载失败',
+        loading: '正在加载文件...',
+        prevPage: '上一页',
+        nextPage: '下一页',
+        pageOf: '第 {current} 页，共 {total} 页'
       },
       search: {
         placeholder: '搜索文件名...',

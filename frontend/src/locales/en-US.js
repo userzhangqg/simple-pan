@@ -25,7 +25,7 @@ export default {
         dragText: 'Drop files here or click to upload',
         sizeError: 'File size cannot exceed 100MB',
         typeError: 'Unsupported file type, only the following formats are supported:',
-        supportedTypes: 'Supported file types: .jpg, .jpeg, .png, .gif, .pdf, .doc, .docx, .xls, .xlsx, .txt'
+        supportedTypes: 'Supported file types: .jpg, .jpeg, .png, .gif, .pdf, .doc, .docx, .xls, .xlsx, .txt, .epub'
       },
       download: {
         success: 'File downloaded successfully',
@@ -42,8 +42,11 @@ export default {
       preview: {
         notSupported: 'Preview not supported for this file type',
         outline: 'Outline',
-        error: 'Failed to load PDF',
-        loading: 'Loading PDF file...'
+        error: 'Failed to load file',
+        loading: 'Loading file...',
+        prevPage: 'Previous Page',
+        nextPage: 'Next Page',
+        pageOf: 'Page {current} of {total}'
       },
       search: {
         placeholder: 'Search files...',
